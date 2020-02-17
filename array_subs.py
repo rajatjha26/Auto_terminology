@@ -2,6 +2,17 @@ from collections import deque
 import re
 import sys
 import csv
+import getopt
+import inspect
+
+def PrintLog(message="Here....."):
+    callerframerecord = inspect.stack()[1]    # 0 represents this line
+                                                # 1 represents line at caller
+    frame = callerframerecord[0]
+    info = inspect.getframeinfo(frame)
+    print ("LOG: %s:, %s:, %s:, %s" %(info.filename, info.function, info.lineno, message))
+
+
 
 #find and replace data file
 dict_data_file='termbase-for-terminology-automation.csv'
@@ -37,7 +48,7 @@ def concat_data():
     return data_dict
 
 def final_out(temp):
-    f=open('output.txt','w')
+    f=open(outfile,'w')
     final_dict={}
     final_dict.update(concat_data())
     for key,value in final_dict.items():
@@ -142,17 +153,39 @@ def make_data():
     
 
 def start():
-    if(len(sys.argv)>=2):
-        with open(dict_data_file, mode="rU") as infile:
-            reader = csv.reader(infile, dialect="excel")   
-            with open(text_file, mode="w") as outfile:
-                writer = csv.writer(outfile, delimiter='!')
-                writer.writerows(reader)
-        for i in range(1,len(sys.argv)):
-            opt.append(sys.argv[i])
-    else:
-        print('Unsufficient arguments')
-        return
+    options, remainder = getopt.getopt(sys.argv[1:], 'hi:r:o:',
+                                  ['ifile=','rule=', 'ofile=', 'help'])
+#print 'OPTIONS   :', options
+    for opt, arg in options:
+        if opt in ('-i', '--ifile'):
+            src_text_file = arg
+        elif opt in ('-r', '--rule'):
+            dict_data_file = arg 
+        elif opt in ('-o', '--ofile'):
+            outfile = arg
+        elif opt in ('-h', '--help'):
+            help = True
+
+    if (help == True):
+        print("Usage: \
+                \n -i --input file, \
+            \n -r, --rule file, \
+            \n -o, --output file, \
+            \n -h, --help")
+        sys.exit(1)	 
+    PrintLog("Command line processed...")
+    #print 'Command line arguments: ', sys.argv[1:]
+        if(len(sys.argv)>=2):
+            with open(dict_data_file, mode="rU") as infile:
+                reader = csv.reader(infile, dialect="excel")   
+                with open(text_file, mode="w") as outfile:
+                    writer = csv.writer(outfile, delimiter='!')
+                    writer.writerows(reader)
+            for i in range(1,len(sys.argv)):
+                opt.append(sys.argv[i])
+        else:
+            print('Unsufficient arguments')
+            return
     make_data()
 
 start()
