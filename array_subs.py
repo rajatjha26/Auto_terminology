@@ -14,25 +14,17 @@ def PrintLog(message="Here....."):
 
 
 
-#find and replace data file
-dict_data_file='termbase-for-terminology-automation.csv'
-
-text_file='temp2.txt'
-#data file
-src_text_file='all.txt'
-
 log=open('log.csv','w')
 
-opt=[]
 dict_sorted={}
 find_data=[]
 
-def concat_data():
+def concat_data(ind_arr):
     data_dict={}
     for key,value in dict_sorted.items():
         k=1
         temp_data1=""
-        for data in opt:
+        for data in ind_arr:
             # print(data,value)
             if(k==1):
                 if(value[int(data)-1]=="NULL"):
@@ -47,10 +39,12 @@ def concat_data():
         data_dict.update({key:res})
     return data_dict
 
-def final_out(temp):
-    f=open(outfile,'w')
+def final_out(temp,output_file,ind_arr):
+    # print(ind_arr)
+    PrintLog(message="In final_out Module")
+    f=open(output_file ,'w')
     final_dict={}
-    final_dict.update(concat_data())
+    final_dict.update(concat_data(ind_arr))
     for key,value in final_dict.items():
         for data in range(len(temp)):
             data=temp.popleft()
@@ -76,7 +70,8 @@ def sort_dict(dict_file,ind):
     return data_dict
 
 
-def subs(new_d,temp,col_count):
+def subs(new_d,temp,col_count,output_file,ind_arr):
+    PrintLog(message="In subs Module, data substitution started")
     f=open('intermediate.txt','w')
     log_dict={}
     for col in range(col_count):
@@ -111,9 +106,10 @@ def subs(new_d,temp,col_count):
         d=d.strip()
         f.write(d)
         f.write("\n")
-    final_out(temp)
+    final_out(temp,output_file,ind_arr)
 
-def make_data():
+def make_data(text_file,src_text_file,output_file,ind_arr):
+    PrintLog(message="In Make_data Module")
     dict_data=open(text_file,'r')
     src_file=open(src_text_file,'r')
     find=[]
@@ -124,7 +120,6 @@ def make_data():
     for data in dict_data:
         if data.startswith('"'):
             data=data[1:-2]
-        print(data)
         temp_data=[]
         find=data.split('!')
         for index in range(len(find)):
@@ -149,43 +144,53 @@ def make_data():
         temp.append(str(src))
     temp.append('@@@')
     temp=deque(temp)
-    subs(dict_sorted,temp,col_count)
+    subs(dict_sorted,temp,col_count,output_file,ind_arr)
     
 
 def start():
-    options, remainder = getopt.getopt(sys.argv[1:], 'hi:r:o:',
-                                  ['ifile=','rule=', 'ofile=', 'help'])
-#print 'OPTIONS   :', options
-    for opt, arg in options:
-        if opt in ('-i', '--ifile'):
-            src_text_file = arg
-        elif opt in ('-r', '--rule'):
-            dict_data_file = arg 
-        elif opt in ('-o', '--ofile'):
-            outfile = arg
-        elif opt in ('-h', '--help'):
-            help = True
+    ind_arr=[]
+    text_file='temp2.txt'
+    src_text_file='all.txt'
+    dict_data_file='termbase-for-terminology-automation.csv'
+    output_file='output.txt'
+    try:
+        options, remainder = getopt.getopt(sys.argv[1:], 'hi:r:o:v:',['ifile=','rule=', 'ofile=', 'help' ,'value='])
+    except getopt.GetoptError:
+        print ('array_subs.py -i <inputfile> -r <rulefile> -o <outputfile> -v <index>')
+        sys.exit(2)
 
-    if (help == True):
-        print("Usage: \
+    
+    for opt, arg in options:
+        if opt in ('-h', '--help'):
+            print("Usage: \
                 \n -i --input file, \
-            \n -r, --rule file, \
-            \n -o, --output file, \
-            \n -h, --help")
-        sys.exit(1)	 
-    PrintLog("Command line processed...")
-    #print 'Command line arguments: ', sys.argv[1:]
-        if(len(sys.argv)>=2):
-            with open(dict_data_file, mode="rU") as infile:
-                reader = csv.reader(infile, dialect="excel")   
-                with open(text_file, mode="w") as outfile:
-                    writer = csv.writer(outfile, delimiter='!')
-                    writer.writerows(reader)
-            for i in range(1,len(sys.argv)):
-                opt.append(sys.argv[i])
-        else:
-            print('Unsufficient arguments')
-            return
-    make_data()
+                \n -r, --rule file, \
+                \n -o, --output file, \
+                \n -v, --index value, \
+                \n -h, --help")
+            print('coammand: \
+            \n array_subs.py -i <inputfile> -r <rulefile> -o <outputfile> -v "<index1>,<index2>,..."')
+            sys.exit(1)	
+        elif opt in ('-v', '--value'):
+            ind_arr = arg.split(',')
+            PrintLog('index are=%s'%arg)
+        elif opt in ('-i', '--ifile'):
+            src_text_file = arg
+            PrintLog('input file=%s'%arg)
+        elif opt in ('-r', '--rule'):
+            dict_data_file = arg
+            PrintLog('rule file=%s'%arg)
+        elif opt in ('-o', '--ofile'):
+            output_file = arg
+            PrintLog('output file=%s'%arg)
+    # print(ind_arr)
+
+    
+    with open(dict_data_file, mode="rU") as infile:
+        reader = csv.reader(infile, dialect="excel")   
+        with open(text_file, mode="w") as outfile:
+            writer = csv.writer(outfile, delimiter='!')
+            writer.writerows(reader)
+    make_data(text_file,src_text_file,output_file,ind_arr)
 
 start()
