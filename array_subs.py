@@ -1,9 +1,12 @@
+import os
 from collections import deque
 import re
 import sys
 import csv
 import getopt
 import inspect
+import pandas as pd
+
 
 def PrintLog(message="Here....."):
     callerframerecord = inspect.stack()[1]    # 0 represents this line
@@ -17,7 +20,7 @@ def PrintLog(message="Here....."):
 log=open('log.csv','w')
 
 dict_sorted={}
-find_data=[]
+# find_data=[]
 
 def concat_data(ind_arr):
     data_dict={}
@@ -58,6 +61,10 @@ def final_out(temp,output_file,ind_arr):
         d=d.strip()
         f.write(d)
         f.write("\n")
+    if os.path.exists("temp2.txt"):
+        os.remove("temp2.txt")
+    if os.path.exists("a.csv"):
+        os.remove("a.csv")
 
 def sort_dict(dict_file,ind):
     # print(dict_file)
@@ -129,14 +136,20 @@ def make_data(text_file,src_text_file,output_file,ind_arr):
                 find[index]='NULL'
         if(j==1):
             col_count=len(find)-1
-        find_data.append(find)
+        # find_data.append(find)
         for index in range(1,len(find)):
             temp_data.append(str(find[index]))
         # main_data.append(temp_data)
         for data in range(len(temp_data)):
             if(temp_data[data] not in ['NULL','',' ']):
-                mask_id="#"+str(find[0])+"#"+str(temp_data[data])+"#"
-                # print(mask_id)
+                a=[]
+                a=temp_data[data].split()
+                var=a[0]
+                for q in a[1:]:
+                    var=var+"_"+str(q)
+
+                mask_id="#"+str(find[0])+"#"+str(var)+"#"
+                # PrintLog(mask_id)
                 break
         dict_sorted.update({mask_id:temp_data})
         j=j+1
@@ -178,7 +191,12 @@ def start():
             src_text_file = arg
             PrintLog('input file=%s'%arg)
         elif opt in ('-r', '--rule'):
-            dict_data_file = arg
+            if(arg.endswith('.xlsx')):
+                file = pd.read_excel(arg)
+                file.to_csv('a.csv',sep="!",index=False)
+                dict_data_file = 'a.csv'
+            else:
+                dict_data_file = arg
             PrintLog('rule file=%s'%arg)
         elif opt in ('-o', '--ofile'):
             output_file = arg
