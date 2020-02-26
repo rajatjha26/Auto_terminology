@@ -54,7 +54,7 @@ def final_out(temp,output_file,ind_arr):
             if(data=='@@@'):
                 temp.append('@@@')
                 break
-            result = re.sub(r"\s(%s)\s" %key, value, data,0, re.MULTILINE | re.UNICODE)
+            result = re.sub(r"(\s|^)(%s)(\s|[.,।!|?:/])" %key, r"\1"+(str(value)).strip()+r"\3", data,0, re.MULTILINE | re.UNICODE)
             temp.append(result)
     for d in temp:
         d=d.replace('@@@','')
@@ -94,10 +94,9 @@ def subs(new_d,temp,col_count,output_file,ind_arr):
                     temp.append('@@@')
                     break 
 #Strings in any of the three given format is will be substituted i.e " str ","str "," str[.,।!|?:/]"
-                result = re.sub(r"\s(%s)\s|\s(%s)[.,।!|?:/]|^(%s)\s" %(values,values,values), key, data,0, re.MULTILINE | re.UNICODE)
+                result = re.sub(r"(\s|^)(%s)(\s|[.,।!|?:/])" %(values), r"\1"+(str(key)).strip()+r"\3", data,0, re.MULTILINE | re.UNICODE)
                 if(re.search(r"\s(%s)\s|\s(%s)[.,।!|?]|^(%s)\s" %(values,values,values),data, re.MULTILINE | re.UNICODE)):
                     if values in log_dict.keys():
-                        PrintLog("String Found "+ str(values))
                         log_dict[values]=log_dict[values]+1
                         
                     else:
