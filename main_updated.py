@@ -58,7 +58,7 @@ for row in new_d:
         if(data=='@@@'):
             temp.append('@@@')
             break
-        result = re.sub(r"\s(%s)\s" %row, new_d[row], data,0, re.MULTILINE | re.UNICODE)
+        result = re.sub(r"\s(%s)\s|\s(%s)[.,।!|?]|^(%s)\s" %row, new_d[row], data,0, re.MULTILINE | re.UNICODE | re.IGNORECASE)
         temp.append(result)
 
 if(opt=='span'):

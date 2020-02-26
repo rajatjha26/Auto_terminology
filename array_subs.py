@@ -92,10 +92,12 @@ def subs(new_d,temp,col_count,output_file,ind_arr):
                 data=temp.popleft()
                 if(data=='@@@'):
                     temp.append('@@@')
-                    break
-                result = re.sub(r"\s(%s)\s" %values, key, data,0, re.MULTILINE | re.UNICODE)
-                if(re.search(r"\s(%s)\s" %values,data, re.MULTILINE | re.UNICODE)):
+                    break 
+#Strings in any of the three given format is will be substituted i.e " str ","str "," str[.,।!|?:/]"
+                result = re.sub(r"\s(%s)\s|\s(%s)[.,।!|?:/]|^(%s)\s" %(values,values,values), key, data,0, re.MULTILINE | re.UNICODE)
+                if(re.search(r"\s(%s)\s|\s(%s)[.,।!|?]|^(%s)\s" %(values,values,values),data, re.MULTILINE | re.UNICODE)):
                     if values in log_dict.keys():
+                        PrintLog("String Found "+ str(values))
                         log_dict[values]=log_dict[values]+1
                         
                     else:
@@ -113,6 +115,7 @@ def subs(new_d,temp,col_count,output_file,ind_arr):
         d=d.strip()
         f.write(d)
         f.write("\n")
+    PrintLog("Intermediate File is created")
     final_out(temp,output_file,ind_arr)
 
 def make_data(text_file,src_text_file,output_file,ind_arr):
@@ -154,7 +157,13 @@ def make_data(text_file,src_text_file,output_file,ind_arr):
         dict_sorted.update({mask_id:temp_data})
         j=j+1
     for src in src_file:
-        temp.append(str(src))
+        src=src.strip()
+        a=src.split(' ')
+        data1=a[0]
+        for data in a[1:]:
+            if(data):
+                data1=data1+" "+str(data)
+        temp.append(str(data1))
     temp.append('@@@')
     temp=deque(temp)
     subs(dict_sorted,temp,col_count,output_file,ind_arr)
