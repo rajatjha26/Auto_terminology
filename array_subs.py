@@ -44,7 +44,7 @@ def concat_data(ind_arr):
 
 def final_out(temp,output_file,ind_arr):
     # print(ind_arr)
-    PrintLog(message="In final_out Module")
+    PrintLog(message="In final_out Module,Replacement from the specified index is performed.")
     f=open(output_file ,'w')
     final_dict={}
     final_dict.update(concat_data(ind_arr))
@@ -54,7 +54,7 @@ def final_out(temp,output_file,ind_arr):
             if(data=='@@@'):
                 temp.append('@@@')
                 break
-            result = re.sub(r"(\s|^)(%s)(\s|[.,।!|?:/])" %key, r"\1"+(str(value)).strip()+r"\3", data,0, re.MULTILINE | re.UNICODE)
+            result = re.sub(r"(\s|^)(%s)(\s|[-.,।!|?:;-~`'\"\[\]\(\)]|$)" %key, r"\1"+(str(value)).strip()+r"\3", data,0, re.MULTILINE | re.UNICODE | re.IGNORECASE)
             temp.append(result)
     for d in temp:
         d=d.replace('@@@','')
@@ -65,6 +65,7 @@ def final_out(temp,output_file,ind_arr):
         os.remove("temp2.txt")
     if os.path.exists("a.csv"):
         os.remove("a.csv")
+    PrintLog("Done")
 
 def sort_dict(dict_file,ind):
     # print(dict_file)
@@ -78,7 +79,7 @@ def sort_dict(dict_file,ind):
 
 
 def subs(new_d,temp,col_count,output_file,ind_arr):
-    PrintLog(message="In subs Module, data substitution started")
+    PrintLog(message="In subs Module, data substitution started...")
     f=open('intermediate.txt','w')
     log_dict={}
     for col in range(col_count):
@@ -94,8 +95,8 @@ def subs(new_d,temp,col_count,output_file,ind_arr):
                     temp.append('@@@')
                     break 
 #Strings in any of the three given format is will be substituted i.e " str ","str "," str[.,।!|?:/]"
-                result = re.sub(r"(\s|^)(%s)(\s|[.,।!|?:/])" %(values), r"\1"+(str(key)).strip()+r"\3", data,0, re.MULTILINE | re.UNICODE)
-                if(re.search(r"\s(%s)\s|\s(%s)[.,।!|?]|^(%s)\s" %(values,values,values),data, re.MULTILINE | re.UNICODE)):
+                result = re.sub(r"(\s|^)(%s)(\s|[-.,।!|?:;-~`'\"\[\]\(\)]|$)" %(values), r"\1"+(str(key)).strip()+r"\3", data,0, re.MULTILINE | re.UNICODE | re.IGNORECASE)
+                if(re.search(r"(\s|^)(%s)(\s|[-.,।!|?:-;-~`'\"\[\]\(\)]|$)" %(values),data, re.MULTILINE | re.UNICODE | re.IGNORECASE)):
                     if values in log_dict.keys():
                         log_dict[values]=log_dict[values]+1
                         
@@ -103,7 +104,10 @@ def subs(new_d,temp,col_count,output_file,ind_arr):
                         log_dict.update({values:1})
                 
                 temp.append(result)
+    tot_rep,uniq_repl=0,0
     for data,value in log_dict.items():
+        uniq_repl=uniq_repl+1
+        tot_rep=tot_rep+value
         log.write(str(data))
         log.write("!@")
         log.write(str(value))
@@ -115,10 +119,11 @@ def subs(new_d,temp,col_count,output_file,ind_arr):
         f.write(d)
         f.write("\n")
     PrintLog("Intermediate File is created")
+    PrintLog("Terms replaced :"+str(tot_rep)+"("+str(uniq_repl)+" unique)")
     final_out(temp,output_file,ind_arr)
 
 def make_data(text_file,src_text_file,output_file,ind_arr):
-    PrintLog(message="In Make_data Module")
+    PrintLog(message="data Preprocessing started(make_data module)...")
     dict_data=open(text_file,'r')
     src_file=open(src_text_file,'r')
     find=[]
