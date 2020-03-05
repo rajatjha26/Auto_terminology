@@ -6,6 +6,9 @@ import csv
 import getopt
 import inspect
 import pandas as pd
+from pyexcel_ods import get_data
+import pyexcel
+import json
 
 
 def PrintLog(message="Here....."):
@@ -208,6 +211,16 @@ def start():
                 file = pd.read_excel(arg)
                 file.to_csv('a.csv',sep="!",index=False)
                 dict_data_file = 'a.csv'
+            elif(arg.endswith('.ods')):
+                data11 = get_data(arg)
+                new_data11=json.dumps(data11)
+                new_data11=json.loads(new_data11)
+                key11=''
+                for key11, value11 in new_data11.items() :
+                    break
+                pyexcel.save_as(array=new_data11[key11],dest_file_name="a.csv",dest_delimiter="!")
+                dict_data_file = 'a.csv'
+
             else:
                 dict_data_file = arg
             PrintLog('rule file=%s'%arg)
